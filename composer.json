@@ -1,7 +1,7 @@
 {
     "name": "graphaware/neo4j-php-client",
     "type": "library",
-    "description": "Neo4j-PHP-Client is the most advanced PHP Client for Neo4j",
+    "description": "Neo4j PHP legacy Client is a fork of the Graphaware Neo4j PHP Client",
     "keywords": [
         "graph",
         "database",
@@ -12,12 +12,12 @@
         "http",
         "high-availability"
     ],
-    "homepage": "http://graphaware.com",
+    "homepage": "https://laudis.tech",
     "license": "MIT",
     "authors": [
         {
-            "name": "Christophe Willemsen",
-            "email": "christophe@graphaware.com"
+            "name": "Ghlen Nagels",
+            "email": "ghlen@pm.me"
         }
     ],
     "require": {
@@ -32,6 +32,8 @@
       "php-http/message-factory": "^1.0",
       "php-http/client-common": "^1.0",
       "php-http/discovery": "^1.0",
+
+      "laudis/neo4j-php-client": "v2.0.x-dev",
 
       "php-http/message": "^1.0",
       "php-http/guzzle6-adapter": "^1.0"
