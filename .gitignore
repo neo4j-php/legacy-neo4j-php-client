@@ -9,3 +9,4 @@ tests/database_settings.yml
 vendor/
 phpunit.xml
 /.idea
+.phpunit.result.cache

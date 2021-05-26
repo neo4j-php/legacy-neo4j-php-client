@@ -14,20 +14,21 @@ namespace GraphAware\Neo4j\Client\Tests\Integration;
 use GraphAware\Neo4j\Client\ClientBuilder;
 use GraphAware\Neo4j\Client\Exception\Neo4jExceptionInterface;
 use GraphAware\Neo4j\Client\Neo4jClientEvents;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class BuildWithEventListenersIntegrationTest.
  *
  * @group listener
  */
-class BuildWithEventListenersIntegrationTest extends \PHPUnit_Framework_TestCase
+class BuildWithEventListenersIntegrationTest extends TestCase
 {
     /**
      * @return string
      */
     private function createBoltUrl()
     {
-        $boltUrl = 'bolt://localhost';
+        $boltUrl = 'bolt://neo4j';
         if (isset($_ENV['NEO4J_USER'])) {
             $boltUrl = sprintf(
                 'bolt://%s:%s@%s',

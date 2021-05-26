@@ -2,13 +2,15 @@
 
 namespace GraphAware\Neo4j\Client\Tests;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Class DrupalIssueTest
  * @package GraphAware\Neo4j\Client\Tests
  *
  * @group drupal
  */
-class DrupalIssueTest extends \PHPUnit_Framework_TestCase
+class DrupalIssueTest extends TestCase
 {
     public function testDrupalConversion()
     {
@@ -37,5 +39,7 @@ class DrupalIssueTest extends \PHPUnit_Framework_TestCase
 
         var_dump($uri);
         var_dump($config);
+
+        $this->assertTrue(true);
     }
 }

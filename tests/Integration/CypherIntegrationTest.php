@@ -17,10 +17,11 @@ use GraphAware\Common\Type\Node;
 use GraphAware\Common\Type\Path;
 use GraphAware\Neo4j\Client\Formatter\Type\Node as HttpNode;
 use GraphAware\Neo4j\Client\Formatter\Type\Relationship as HttpRelationship;
+use InvalidArgumentException;
 
 class CypherIntegrationTest extends IntegrationTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->emptyDb();
@@ -58,11 +59,9 @@ class CypherIntegrationTest extends IntegrationTestCase
         $this->assertInstanceOf(Path::class, $record2->get('p'));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testExceptionIsThrownOnEmptyStatement() {
         $query = '';
+        $this->expectException(InvalidArgumentException::class);
         $this->client->run($query);
     }
 }

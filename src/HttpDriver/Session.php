@@ -24,6 +24,7 @@ use Http\Client\Common\PluginClient;
 use Http\Client\Exception\HttpException;
 use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
+use Laudis\Neo4j\Network\VersionDiscovery;
 use Psr\Http\Message\RequestInterface;
 
 class Session implements SessionInterface
@@ -58,10 +59,12 @@ class Session implements SessionInterface
      */
     private $requestFactory;
 
+    private static $tsxs = [];
+
     /**
-     * @param string                  $uri
+     * @param string $uri
      * @param GuzzleClient|HttpClient $httpClient
-     * @param ConfigInterface         $config
+     * @param ConfigInterface $config
      */
     public function __construct($uri, $httpClient, ConfigInterface $config)
     {
@@ -81,6 +84,12 @@ class Session implements SessionInterface
         $this->responseFormatter = new ResponseFormatter();
         $this->config = $config;
         $this->requestFactory = $config->getValue('request_factory');
+
+        if (!isset(self::$tsxs[$this->uri])) {
+            $discovery = new VersionDiscovery($this->httpClient);
+            $request = $this->requestFactory->createRequest('GET', $this->uri);
+            self::$tsxs[$this->uri] = $discovery->discoverTransactionUrl($request, $this->config->getValue('database', 'neo4j'));
+        }
     }
 
     /**
@@ -116,7 +125,7 @@ class Session implements SessionInterface
 
     /**
      * @param string|null $query
-     * @param array       $parameters
+     * @param array $parameters
      * @param string|null $tag
      *
      * @return Pipeline
@@ -135,16 +144,18 @@ class Session implements SessionInterface
     /**
      * @param Pipeline $pipeline
      *
+     * @return \GraphAware\Common\Result\ResultCollection
      * @throws \GraphAware\Neo4j\Client\Exception\Neo4jException
      *
-     * @return \GraphAware\Common\Result\ResultCollection
      */
     public function flush(Pipeline $pipeline)
     {
         $request = $this->prepareRequest($pipeline);
+        $uri = $request->getUri();
+        $request = $request->withUri($uri->withPath($uri->getPath() . '/commit'));
         try {
             $response = $this->httpClient->sendRequest($request);
-            $data = json_decode((string) $response->getBody(), true);
+            $data = json_decode((string)$response->getBody(), true);
             if (!empty($data['errors'])) {
                 $msg = sprintf('Neo4j Exception with code "%s" and message "%s"', $data['errors'][0]['code'], $data['errors'][0]['message']);
                 $exception = new Neo4jException($msg);
@@ -190,14 +201,14 @@ class Session implements SessionInterface
         $body = json_encode([
             'statements' => $statements,
         ]);
-        $headers = [
+        $headers =
             [
-                'X-Stream' => true,
+                'Accept' => 'application/json;charset=UTF-8',
                 'Content-Type' => 'application/json',
-            ],
-        ];
+            ];
 
-        return $this->requestFactory->createRequest('POST', sprintf('%s/db/data/transaction/commit', $this->uri), $headers, $body);
+
+        return $this->requestFactory->createRequest('POST', self::$tsxs[$this->uri], $headers, $body);
     }
 
     private function formatParams(array $params)
@@ -216,9 +227,9 @@ class Session implements SessionInterface
     }
 
     /**
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws Neo4jException
      *
-     * @return \Psr\Http\Message\ResponseInterface
      */
     public function begin()
     {
@@ -240,12 +251,12 @@ class Session implements SessionInterface
     }
 
     /**
-     * @param int   $transactionId
+     * @param int $transactionId
      * @param array $statementsStack
      *
+     * @return \GraphAware\Common\Result\ResultCollection
      * @throws Neo4jException
      *
-     * @return \GraphAware\Common\Result\ResultCollection
      */
     public function pushToTransaction($transactionId, array $statementsStack)
     {
@@ -275,7 +286,7 @@ class Session implements SessionInterface
 
         try {
             $response = $this->httpClient->sendRequest($request);
-            $data = json_decode((string) $response->getBody(), true);
+            $data = json_decode((string)$response->getBody(), true);
             if (!empty($data['errors'])) {
                 $msg = sprintf('Neo4j Exception with code "%s" and message "%s"', $data['errors'][0]['code'], $data['errors'][0]['message']);
                 $exception = new Neo4jException($msg);
@@ -308,7 +319,7 @@ class Session implements SessionInterface
         $request = $this->requestFactory->createRequest('POST', sprintf('%s/db/data/transaction/%d/commit', $this->uri, $transactionId));
         try {
             $response = $this->httpClient->sendRequest($request);
-            $data = json_decode((string) $response->getBody(), true);
+            $data = json_decode((string)$response->getBody(), true);
             if (!empty($data['errors'])) {
                 $msg = sprintf('Neo4j Exception with code "%s" and message "%s"', $data['errors'][0]['code'], $data['errors'][0]['message']);
                 $exception = new Neo4jException($msg);

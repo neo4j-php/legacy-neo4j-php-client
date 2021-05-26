@@ -13,16 +13,17 @@ namespace GraphAware\Neo4j\Client\Tests\Unit\Connection;
 
 use GraphAware\Neo4j\Client\Connection\Connection;
 use GraphAware\Neo4j\Client\HttpDriver\Driver as HttpDriver;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @group unit
  * @group connection
  */
-class ConnectionUnitTest extends \PHPUnit_Framework_TestCase
+class ConnectionUnitTest extends TestCase
 {
     public function testConnectionInstantiation()
     {
-        $connection = new Connection('default', 'http://localhost:7474', null, 5);
+        $connection = new Connection('default', 'http://neo4j:7474', null, 5);
         $this->assertInstanceOf(HttpDriver::class, $connection->getDriver());
     }
 }

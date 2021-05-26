@@ -22,7 +22,7 @@ class StatementParametersTest extends IntegrationTestCase
     {
         $query = 'CREATE (a), (b)
         MERGE (a)-[r:RELATES]->(b)
-        SET r += {fields} RETURN id(r) as id';
+        SET r += $fields RETURN id(r) as id';
 
         $params = ['a' => 30, 'b' => 31, 'fields' => []];
         $result = $this->client->run($query, $params, null, 'http');
@@ -33,7 +33,7 @@ class StatementParametersTest extends IntegrationTestCase
     {
         $query = 'CREATE (a), (b)
         MERGE (a)-[r:RELATES]->(b)
-        SET r += {fields} RETURN id(r) as id';
+        SET r += $fields RETURN id(r) as id';
 
         $params = ['a' => 30, 'b' => 31, 'fields' => []];
         $tx = $this->client->transaction('http');

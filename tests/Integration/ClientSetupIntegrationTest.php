@@ -18,18 +18,19 @@ use GraphAware\Neo4j\Client\Connection\Connection;
 use GraphAware\Neo4j\Client\Connection\ConnectionManager;
 use GraphAware\Neo4j\Client\HttpDriver\Driver as HttpDriver;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class ClientSetupIntegrationTest.
  *
  * @group setup
  */
-class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
+class ClientSetupIntegrationTest extends TestCase
 {
     public function testClientSetupWithOneConnection()
     {
         $client = ClientBuilder::create()
-            ->addConnection('default', 'bolt://localhost')
+            ->addConnection('default', 'bolt://neo4j')
             ->build();
 
         $this->assertInstanceOf(Client::class, $client);
@@ -38,7 +39,7 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
     public function testHttpDriverIsUsedForConnection()
     {
         $client = ClientBuilder::create()
-            ->addConnection('default', 'http://localhost:7474')
+            ->addConnection('default', 'http://neo4j:7474')
             ->build();
 
         $connection = $client->getConnectionManager()->getConnection('default');
@@ -48,7 +49,7 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
     public function testBoltDriverIsUsedForConnection()
     {
         $client = ClientBuilder::create()
-            ->addConnection('default', 'bolt://localhost')
+            ->addConnection('default', 'bolt://neo4j')
             ->build();
 
         $connection = $client->getConnectionManager()->getConnection('default');
@@ -58,8 +59,8 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
     public function testTwoConnectionCanBeUsed()
     {
         $client = ClientBuilder::create()
-            ->addConnection('http', 'http://localhost:7474')
-            ->addConnection('bolt', 'bolt://localhost')
+            ->addConnection('http', 'http://neo4j:7474')
+            ->addConnection('bolt', 'bolt://neo4j')
             ->build();
 
         $this->assertInstanceOf(HttpDriver::class, $client->getConnectionManager()->getConnection('http')->getDriver());
@@ -69,9 +70,9 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
     public function testNullIseReturnedForMasterWhenNoMasterIsDefined()
     {
         $client = ClientBuilder::create()
-            ->addConnection('default', 'http://localhost:7474')
-            ->addConnection('conn2', 'http://localhost:7575')
-            ->addConnection('conn3', 'http://localhost:7676')
+            ->addConnection('default', 'http://neo4j:7474')
+            ->addConnection('conn2', 'http://neo4j:7575')
+            ->addConnection('conn3', 'http://neo4j:7676')
             ->build();
 
         $this->assertNull($client->getConnectionManager()->getMasterConnection());
@@ -80,9 +81,9 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
     public function testICanDefineConnectionAsWriteOrRead()
     {
         $client = ClientBuilder::create()
-           ->addConnection('default', 'http://localhost:7474')
-           ->addConnection('conn2', 'http://localhost:7575')
-           ->addConnection('conn3', 'http://localhost:7676')
+           ->addConnection('default', 'http://neo4j:7474')
+           ->addConnection('conn2', 'http://neo4j:7575')
+           ->addConnection('conn3', 'http://neo4j:7676')
            ->setMaster('conn2')
            ->build();
 
@@ -92,9 +93,9 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
     public function testSecondIsMasterCallOverridesPreviousOne()
     {
         $client = ClientBuilder::create()
-            ->addConnection('default', 'http://localhost:7474')
-            ->addConnection('conn2', 'http://localhost:7575')
-            ->addConnection('conn3', 'http://localhost:7676')
+            ->addConnection('default', 'http://neo4j:7474')
+            ->addConnection('conn2', 'http://neo4j:7575')
+            ->addConnection('conn3', 'http://neo4j:7676')
             ->setMaster('conn2')
             ->setMaster('default')
             ->build();
@@ -104,18 +105,18 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testExceptionIsThrownWhenMasterAliasDoesntExist()
     {
-        $this->setExpectedException(InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $client = ClientBuilder::create()
-            ->addConnection('default', 'http://localhost:7474')
-            ->addConnection('conn2', 'http://localhost:7575')
-            ->addConnection('conn3', 'http://localhost:7676')
+            ->addConnection('default', 'http://neo4j:7474')
+            ->addConnection('conn2', 'http://neo4j:7575')
+            ->addConnection('conn3', 'http://neo4j:7676')
             ->setMaster('conn5')
             ->build();
     }
 
     public function testSendWriteUseMasterIfAvailable()
     {
-        $httpUri = 'http://localhost:7474';
+        $httpUri = 'http://neo4j:7474';
         if (isset($_ENV['NEO4J_USER'])) {
             $httpUri = sprintf(
                 '%s://%s:%s@%s:%s',

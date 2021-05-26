@@ -12,15 +12,16 @@
 namespace GraphAware\Neo4j\Client\Tests\Integration;
 
 use GraphAware\Neo4j\Client\ClientBuilder;
+use PHPUnit\Framework\TestCase;
 
-class IntegrationTestCase extends \PHPUnit_Framework_TestCase
+class IntegrationTestCase extends TestCase
 {
     /**
      * @var \GraphAware\Neo4j\Client\Client
      */
     protected $client;
 
-    public function setUp()
+    public function setUp(): void
     {
         $connections = array_merge($this->getConnections(), $this->getAdditionalConnections());
 
@@ -32,7 +33,7 @@ class IntegrationTestCase extends \PHPUnit_Framework_TestCase
 
     protected function getConnections()
     {
-        $httpUri = 'http://localhost:7474';
+        $httpUri = 'http://neo4j:7474';
         if (isset($_ENV['NEO4J_USER'])) {
             $httpUri = sprintf(
                 '%s://%s:%s@%s:%s',
@@ -44,7 +45,7 @@ class IntegrationTestCase extends \PHPUnit_Framework_TestCase
             );
         }
 
-        $boltUrl = 'bolt://localhost';
+        $boltUrl = 'bolt://neo4j';
         if (isset($_ENV['NEO4J_USER'])) {
             $boltUrl = sprintf(
                 'bolt://%s:%s@%s',

@@ -26,7 +26,7 @@ class ReportedIssuesTest extends IntegrationTestCase
         $this->createNodeWithRels();
         $tx = $this->client->transaction();
         $tx->push('MATCH (n:Node) DELETE n');
-        $this->setExpectedException(Neo4jException::class);
+        $this->expectException(Neo4jException::class);
         $tx->commit();
     }
 
