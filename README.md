@@ -1,11 +1,8 @@
-# GraphAware Neo4j PHP Client
+# Legacy GraphAware Neo4j PHP Client
 
-## An Enterprise Grade Client for Neo4j
+## ⚠️ Warning ⚠️
 
-[![Build Status](https://travis-ci.org/graphaware/neo4j-php-client.svg?branch=master)](https://travis-ci.org/graphaware/neo4j-php-client)
-[![Latest Stable Version](https://poser.pugx.org/graphaware/neo4j-php-client/v/stable.svg)](https://packagist.org/packages/graphaware/neo4j-php-client)
-[![Total Downloads](https://poser.pugx.org/graphaware/neo4j-php-client/downloads.svg)](https://packagist.org/packages/graphaware/neo4j-php-client)
-[![License](https://poser.pugx.org/graphaware/neo4j-php-client/license.svg)](https://packagist.org/packages/graphaware/neo4j-php-client)
+This is a legacy api. This project exists to ️allow people to quickly get up and running with newer versions of neo4j in existing projects. For the newest drivers and latest features, please visit the [neo4j php client](https://github.com/neo4j-php/neo4j-php-client) on the [neo4j-php](https://github.com/neo4j-php) github page.
 
 ## Introduction
 
@@ -477,7 +474,7 @@ $client = ClientBuilder::create()
 
 The timeout by default is 5 seconds.
 
-This feature is deprecated and will be removed in version 5. See Http client settings below. 
+This feature is deprecated and will be removed in version 5. See Http client settings below.
 
 ### TLS
 
