@@ -233,7 +233,7 @@ class Session implements SessionInterface
      */
     public function begin()
     {
-        $request = $this->requestFactory->createRequest('POST', sprintf('%s/db/data/transaction', $this->uri));
+        $request = $this->requestFactory->createRequest('POST', self::$tsxs[$this->uri]);
 
         try {
             return $this->httpClient->sendRequest($request);
@@ -282,7 +282,7 @@ class Session implements SessionInterface
             'statements' => $statements,
         ]);
 
-        $request = $this->requestFactory->createRequest('POST', sprintf('%s/db/data/transaction/%d', $this->uri, $transactionId), $headers, $body);
+        $request = $this->requestFactory->createRequest('POST', self::$tsxs[$this->uri] . '/' . $transactionId, $headers, $body);
 
         try {
             $response = $this->httpClient->sendRequest($request);
@@ -316,7 +316,7 @@ class Session implements SessionInterface
      */
     public function commitTransaction($transactionId)
     {
-        $request = $this->requestFactory->createRequest('POST', sprintf('%s/db/data/transaction/%d/commit', $this->uri, $transactionId));
+        $request = $this->requestFactory->createRequest('POST', self::$tsxs[$this->uri] . '/' . $transactionId . '/commit');
         try {
             $response = $this->httpClient->sendRequest($request);
             $data = json_decode((string)$response->getBody(), true);
@@ -346,7 +346,7 @@ class Session implements SessionInterface
      */
     public function rollbackTransaction($transactionId)
     {
-        $request = $this->requestFactory->createRequest('DELETE', sprintf('%s/db/data/transaction/%d', $this->uri, $transactionId));
+        $request = $this->requestFactory->createRequest('DELETE', self::$tsxs[$this->uri] . '/' . $transactionId);
 
         try {
             $this->httpClient->sendRequest($request);
