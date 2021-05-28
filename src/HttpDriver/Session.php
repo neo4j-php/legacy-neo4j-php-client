@@ -14,6 +14,7 @@ namespace GraphAware\Neo4j\Client\HttpDriver;
 use GraphAware\Common\Connection\BaseConfiguration;
 use GraphAware\Common\Driver\ConfigInterface;
 use GraphAware\Common\Driver\SessionInterface;
+use GraphAware\Common\Result\ResultCollection;
 use GraphAware\Common\Transaction\TransactionInterface;
 use GraphAware\Neo4j\Client\Exception\Neo4jException;
 use GraphAware\Neo4j\Client\Formatter\ResponseFormatter;
@@ -24,8 +25,15 @@ use Http\Client\Common\PluginClient;
 use Http\Client\Exception\HttpException;
 use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
-use Laudis\Neo4j\Network\VersionDiscovery;
+use JsonException;
+use Laudis\Neo4j\Common\Uri;
+use Laudis\Neo4j\Http\HttpHelper;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
+use stdClass;
+use function str_replace;
 
 class Session implements SessionInterface
 {
@@ -65,6 +73,8 @@ class Session implements SessionInterface
      * @param string $uri
      * @param GuzzleClient|HttpClient $httpClient
      * @param ConfigInterface $config
+     * @throws JsonException
+     * @throws ClientExceptionInterface
      */
     public function __construct($uri, $httpClient, ConfigInterface $config)
     {
@@ -72,11 +82,11 @@ class Session implements SessionInterface
             @trigger_error('Passing a Guzzle client to Session is deprecrated. Will be removed in 5.0. Use a HTTPlug client');
             $httpClient = new Client($httpClient);
         } elseif (!$httpClient instanceof HttpClient) {
-            throw new \RuntimeException('Second argument to Session::__construct must be an instance of Http\Client\HttpClient.');
+            throw new RuntimeException('Second argument to Session::__construct must be an instance of Http\Client\HttpClient.');
         }
 
         if (null !== $config && !$config instanceof BaseConfiguration) {
-            throw new \RuntimeException(sprintf('Third argument to "%s" must be null or "%s"', __CLASS__, BaseConfiguration::class));
+            throw new RuntimeException(sprintf('Third argument to "%s" must be null or "%s"', __CLASS__, BaseConfiguration::class));
         }
 
         $this->uri = $uri;
@@ -86,9 +96,23 @@ class Session implements SessionInterface
         $this->requestFactory = $config->getValue('request_factory');
 
         if (!isset(self::$tsxs[$this->uri])) {
-            $discovery = new VersionDiscovery($this->httpClient);
+            $database = $this->config->getValue('database', 'neo4j');
             $request = $this->requestFactory->createRequest('GET', $this->uri);
-            self::$tsxs[$this->uri] = $discovery->discoverTransactionUrl($request, $this->config->getValue('database', 'neo4j'));
+            $client = $this->httpClient;
+
+            $response = $client->sendRequest($request);
+
+            $discovery = HttpHelper::interpretResponse($response);
+            $version = $discovery['neo4j_version'] ?? null;
+
+            if ($version === null) {
+                $request = $request->withUri(Uri::create($discovery['data']));
+                $discovery = HttpHelper::interpretResponse($client->sendRequest($request));
+            }
+
+            $tsx = $discovery['transaction'];
+
+            self::$tsxs[$this->uri] = str_replace('{databaseName}', $database, $tsx);
         }
     }
 
@@ -117,7 +141,7 @@ class Session implements SessionInterface
     public function transaction()
     {
         if ($this->transaction instanceof Transaction) {
-            throw new \RuntimeException('A transaction is already bound to this session');
+            throw new RuntimeException('A transaction is already bound to this session');
         }
 
         return new Transaction($this);
@@ -144,8 +168,8 @@ class Session implements SessionInterface
     /**
      * @param Pipeline $pipeline
      *
-     * @return \GraphAware\Common\Result\ResultCollection
-     * @throws \GraphAware\Neo4j\Client\Exception\Neo4jException
+     * @return ResultCollection
+     * @throws Neo4jException
      *
      */
     public function flush(Pipeline $pipeline)
@@ -216,7 +240,7 @@ class Session implements SessionInterface
         foreach ($params as $key => $v) {
             if (is_array($v)) {
                 if (empty($v)) {
-                    $params[$key] = new \stdClass();
+                    $params[$key] = new stdClass();
                 } else {
                     $params[$key] = $this->formatParams($params[$key]);
                 }
@@ -227,7 +251,7 @@ class Session implements SessionInterface
     }
 
     /**
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return ResponseInterface
      * @throws Neo4jException
      *
      */
@@ -254,7 +278,7 @@ class Session implements SessionInterface
      * @param int $transactionId
      * @param array $statementsStack
      *
-     * @return \GraphAware\Common\Result\ResultCollection
+     * @return ResultCollection
      * @throws Neo4jException
      *
      */
