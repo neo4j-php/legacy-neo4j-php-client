@@ -4,14 +4,6 @@
 
 This is a legacy api. This project exists to ️allow people to quickly get up and running with newer versions of neo4j in existing projects. For the newest drivers and latest features, please visit the [neo4j php client](https://github.com/neo4j-php/neo4j-php-client) on the [neo4j-php](https://github.com/neo4j-php) github page.
 
-## Introduction
-
-Neo4j-PHP-Client is the most advanced and flexible [Neo4j](http://neo4j.com) Client for PHP.
-
-### What is Neo4j?
-
-Neo4j is a transactional, open-source graph database. A graph database manages data in a connected data structure, capable of representing any kind of data in a very accessible way. Information is stored in nodes and relationships connecting them, both of which can have arbitrary properties. To learn more visit [What is a Graph Database](http://neo4j.com/developer/graph-database/)?
-
 ### Key features
 
 * Supports multiple connections
@@ -22,11 +14,8 @@ Neo4j is a transactional, open-source graph database. A graph database manages d
 
 | **Version** | **Tested**  |
 |-------------|-------------|
-| <= 2.2.6    |   No        |
-| >= 2.2.6    |   Yes       |
-| 2.2         |   Yes       |
-| 2.3         |   Yes       |
 | 3.0 +       |   Yes       |
+| 4.0 +       |   Yes       |
 
 #### Neo4j Feature Support
 
@@ -41,7 +30,7 @@ Neo4j is a transactional, open-source graph database. A graph database manages d
 
 ### Requirements
 
-* PHP >= 5.6
+* PHP >= 7.0
 * ext-bcmath
 * ext-mbstring
 * A Neo4j database (minimum version 2.2.6)
@@ -64,7 +53,7 @@ You can:
 Add the library to your composer dependencies :
 
 ```bash
-composer require "graphaware/neo4j-php-client:^4.0"
+composer require "laudis/graphaware-neo4j-php-client-legacy"
 ```
 
 Require the composer autoloader, configure your connection by providing a connection alias and your connection settings :
